@@ -10,7 +10,6 @@ class CharTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($field->data instanceof \Data\Type\String);
 		$this->assertSame(null, $field->data->value);
 		$this->assertSame(false, $field->nullable);
-		$this->assertSame(false, $field->primary);
 		$this->assertSame(255, $field->length);
 	}
 
@@ -30,13 +29,6 @@ class CharTest extends \PHPUnit_Framework_TestCase
 	{
 		$this->setExpectedException('\InvalidArgumentException');
 		$field = new Char(255, null, 'a');
-	}
-
-	public function testPrimary()
-	{
-		$field = new Char();
-		$field->primary();
-		$this->assertSame(true, $field->primary);
 	}
 
 	public function testLength()
