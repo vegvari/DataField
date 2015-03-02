@@ -27,10 +27,6 @@ abstract class Fieldset
 
 	public function __get($name)
 	{
-		if (isset (static::$protected[$name])) {
-			throw new \Exception('Can\'t access protected field ' . $this->table . '.' . $name);
-		}
-
 		return $this->fields[$name]->data->value;
 	}
 
