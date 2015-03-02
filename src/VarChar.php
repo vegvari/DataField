@@ -7,7 +7,6 @@ class VarChar extends String
 	protected static $maxLength = 65535;
 
 	protected $length = 255;
-	protected $primary = false;
 
 	public function __construct($length = 255, $default = null, $nullable = false)
 	{
@@ -31,17 +30,12 @@ class VarChar extends String
 		return $instance;
 	}
 
-	public function primary()
-	{
-		$this->primary = true;
-	}
-
 	protected function check()
 	{
 		parent::check();
 
 		if ($this->length < $this->data->length) {
-			throw new \LengthException('Length of the string (' . $this->data->length . ') is larger than lenght of the field (' . $this->length . ')');
+			throw new \LengthException('Length of the string (' . $this->data->length . ') is larger than length of the field (' . $this->length . ')');
 		}
 	}
 }

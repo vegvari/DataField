@@ -10,7 +10,6 @@ class DecimalTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($field->data instanceof \Data\Type\Float);
 		$this->assertSame(false, $field->nullable);
 		$this->assertSame(false, $field->unsigned);
-		$this->assertSame(false, $field->primary);
 		$this->assertSame(10, $field->precision);
 		$this->assertSame(2, $field->scale);
 	}
@@ -43,13 +42,6 @@ class DecimalTest extends \PHPUnit_Framework_TestCase
 	{
 		$this->setExpectedException('\InvalidArgumentException');
 		$field = new Decimal(10, 2, null, false, 'a');
-	}
-
-	public function testPrimary()
-	{
-		$field = new Decimal();
-		$field->primary();
-		$this->assertSame(true, $field->primary);
 	}
 
 	public function testPrecision()

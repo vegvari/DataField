@@ -10,7 +10,6 @@ class FloatTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($field->data instanceof \Data\Type\Float);
 		$this->assertSame(false, $field->nullable);
 		$this->assertSame(false, $field->unsigned);
-		$this->assertSame(false, $field->primary);
 	}
 
 	public function testDefault()
@@ -41,12 +40,5 @@ class FloatTest extends \PHPUnit_Framework_TestCase
 	{
 		$this->setExpectedException('\InvalidArgumentException');
 		$field = new Float(null, false, 'a');
-	}
-
-	public function testPrimary()
-	{
-		$field = new Float();
-		$field->primary();
-		$this->assertSame(true, $field->primary);
 	}
 }

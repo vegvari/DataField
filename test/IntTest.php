@@ -10,7 +10,6 @@ class IntTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($field->data instanceof \Data\Type\Int);
 		$this->assertSame(false, $field->nullable);
 		$this->assertSame(false, $field->unsigned);
-		$this->assertSame(false, $field->primary);
 	}
 
 	public function testDefault()
@@ -41,12 +40,5 @@ class IntTest extends \PHPUnit_Framework_TestCase
 	{
 		$this->setExpectedException('\InvalidArgumentException');
 		$field = new Int(null, false, 'a');
-	}
-
-	public function testPrimary()
-	{
-		$field = new Int();
-		$field->primary();
-		$this->assertSame(true, $field->primary);
 	}
 }

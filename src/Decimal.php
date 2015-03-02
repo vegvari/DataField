@@ -68,8 +68,5 @@ class Decimal extends Number
 		if ($this->data->value !== null) {
 			$this->data = $this->data->set(round($this->data->value, $this->scale));
 		}
-
-		// var_dump($min, $max);
-		// exit;
 	}
 }

@@ -10,8 +10,6 @@ class SerialTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($field->data instanceof \Data\Type\Int);
 		$this->assertSame(false, $field->nullable);
 		$this->assertSame(true, $field->unsigned);
-		$this->assertSame(true, $field->primary);
-		$this->assertSame(true, $field->serial);
 	}
 
 	public function testDefault()
@@ -30,12 +28,5 @@ class SerialTest extends \PHPUnit_Framework_TestCase
 	{
 		$this->setExpectedException('\InvalidArgumentException');
 		$field = new Serial(null, true, true);
-	}
-
-	public function testPrimary()
-	{
-		$field = new Serial();
-		$field->primary();
-		$this->assertSame(true, $field->primary);
 	}
 }

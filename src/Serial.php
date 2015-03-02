@@ -6,8 +6,6 @@ class Serial extends Int
 {
 	protected $nullable = false;
 	protected $unsigned = true;
-	protected $primary = true;
-	protected $serial = true;
 
 	public function __construct($default = null, $nullable = false, $unsigned = true)
 	{
@@ -24,12 +22,12 @@ class Serial extends Int
 
 	protected function check()
 	{
-		parent::check();
-
 		if ($this->data->value !== null) {
 			if ($this->data->value < 1) {
 				throw new \InvalidArgumentException('Serial must be larger than 0, "' . $this->data->value . '" given');
 			}
 		}
+
+		parent::check();
 	}
 }
