@@ -42,6 +42,11 @@ abstract class Fieldset
 
     public function __set($name, $value)
     {
+        $method = 'set_' . $name;
+        if (method_exists($this, $method)) {
+            $this->$method($value);
+        }
+
         if ($value !== null) {
             try {
                 $this->fields[$name]->set($value);
