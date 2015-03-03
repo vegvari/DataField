@@ -31,12 +31,6 @@ abstract class Fieldset
 
     public function __get($name)
     {
-        return $this->fields[$name]->data->value;
-    }
-
-    public function field($name)
-    {
-
         return $this->fields[$name];
     }
 
