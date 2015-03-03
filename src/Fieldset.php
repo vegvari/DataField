@@ -47,7 +47,7 @@ abstract class Fieldset
                 $this->fields[$name]->set($value);
             } catch (\Exception $e) {
                 $class = get_class($e);
-                throw new $class('Problems with the field "' . $this->table . '.' . $name . '": ' . $e->getMessage());
+                throw new $class('Problems with the field "' . $name . '": ' . $e->getMessage());
             }
         }
     }
