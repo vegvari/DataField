@@ -13,6 +13,54 @@ class IntTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(false, $field->serial);
     }
 
+    public function testSignedMax()
+    {
+        $field = Int::make(2147483647);
+        $this->assertSame(2147483647, $field->data->value);
+    }
+
+    public function testSignedMaxInvalid()
+    {
+        $this->setExpectedException('\InvalidArgumentException');
+        $field = Int::make(2147483647 + 1);
+    }
+
+    public function testSignedMin()
+    {
+        $field = Int::make(-2147483647 - 1);
+        $this->assertSame(-2147483647 - 1, $field->data->value);
+    }
+
+    public function testSignedMinInvalid()
+    {
+        $this->setExpectedException('\InvalidArgumentException');
+        $field = Int::make(-2147483647 - 2);
+    }
+
+    public function testUnsignedMax()
+    {
+        $field = Int::unsigned(2147483647 * 2 + 1);
+        $this->assertSame(2147483647 * 2 + 1, $field->data->value);
+    }
+
+    public function testUnsignedMaxInvalid()
+    {
+        $this->setExpectedException('\InvalidArgumentException');
+        $field = Int::unsigned(2147483647 * 2 + 2);
+    }
+
+    public function testUnsignedMin()
+    {
+        $field = Int::unsigned(0);
+        $this->assertSame(0, $field->data->value);
+    }
+
+    public function testUnsignedMinInvalid()
+    {
+        $this->setExpectedException('\InvalidArgumentException');
+        $field = Int::unsigned(-1);
+    }
+
     public function testDefault()
     {
         $field = Int::make(1);

@@ -4,6 +4,8 @@ namespace Data\Field;
 
 class Int extends Float
 {
+    protected static $max = 2147483647;
+
     protected $data = '\Data\Type\Int';
     protected $serial = false;
 
@@ -24,8 +26,24 @@ class Int extends Float
 
     protected function check()
     {
-        if ($this->data->value !== null && $this->serial === true) {
-            if ($this->data->value < 1) {
+        if ($this->data->value !== null) {
+            if ($this->unsigned === true) {
+                $min = 0;
+                $max = static::$max * 2 + 1;
+            } else {
+                $min = (static::$max * -1 - 1);
+                $max = static::$max;
+            }
+
+            if ($this->data->value !== null && $this->data->value < $min) {
+                throw new \InvalidArgumentException('Minimum value of the field is "' . $min . '", "' . $this->data->value . '" given');
+            }
+
+            if ($this->data->value !== null && $this->data->value > $max) {
+                throw new \InvalidArgumentException('Maximum value of the field is "' . $max . '", "' . $this->data->value . '" given');
+            }
+
+            if ($this->serial === true && $this->data->value < 1) {
                 throw new \InvalidArgumentException('Serial must be larger than 0, "' . $this->data->value . '" given');
             }
         }
