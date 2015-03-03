@@ -4,5 +4,5 @@ namespace Data\Field;
 
 class Char extends VarChar
 {
-	protected static $maxLength = 255;
+    protected static $maxLength = 255;
 }
