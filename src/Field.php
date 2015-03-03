@@ -4,31 +4,31 @@ namespace Data\Field;
 
 abstract class Field
 {
-	protected $data;
-	protected $nullable = false;
+    protected $data;
+    protected $nullable = false;
 
-	public function __construct($default = null, $nullable = false)
-	{
-		$class = $this->data;
-		$this->data = new $class($default);
+    protected function __construct($default = null, $nullable = false)
+    {
+        $class = $this->data;
+        $this->data = new $class($default);
 
-		$this->nullable = \Data\Type\Bool::cast($nullable);
+        $this->nullable = \Data\Type\Bool::cast($nullable);
 
-		$this->check();
-	}
+        $this->check();
+    }
 
-	public function __get($name)
-	{
-		return $this->$name;
-	}
+    public function __get($name)
+    {
+        return $this->$name;
+    }
 
-	public function set($value)
-	{
-		$this->data = $this->data->set($value);
-		$this->check();
-	}
+    public function set($value)
+    {
+        $this->data = $this->data->set($value);
+        $this->check();
+    }
 
-	protected function check()
-	{
-	}
+    protected function check()
+    {
+    }
 }
