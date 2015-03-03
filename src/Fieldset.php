@@ -4,12 +4,11 @@ namespace Data\Field;
 
 abstract class Fieldset
 {
-	protected static $default   = array();
-	protected static $primary   = array();
-	protected static $unique    = array();
-	protected static $index     = array();
+	protected static $default = array();
+	protected static $primary = array();
+	protected static $unique  = array();
+	protected static $index   = array();
 
-	protected $table;
 	protected $fields = array();
 
 	protected function define($name, $value)
