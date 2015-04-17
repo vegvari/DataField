@@ -4,58 +4,56 @@ namespace Data\Field;
 
 class FloatTest extends \PHPUnit_Framework_TestCase
 {
-    public function testMake()
+    public function testSignedDefault()
     {
-        $field = Float::make();
-        $this->assertTrue($field->data instanceof \Data\Type\Float);
-        $this->assertSame(false, $field->nullable);
-        $this->assertSame(false, $field->unsigned);
+        $field = FloatField::signed();
+        $this->assertSame(false, $field->isNullable());
+        $this->assertSame(false, $field->isUnsigned());
     }
 
-    public function testDefault()
+    public function testUnsignedMin()
     {
-        $field = Float::make(1);
-        $this->assertSame(1.0, $field->data->value);
+        $field = FloatField::unsigned(0);
+        $this->assertSame(0.0, $field->value());
     }
 
-    public function testValue()
+    public function testUnsignedMinInvalid()
     {
-        $field = Float::make();
-        $field->set(1);
-        $this->assertSame(1.0, $field->data->value);
+        $this->setExpectedException('\InvalidArgumentException');
+        $field = FloatField::unsigned(-1);
     }
 
     public function testNullable()
     {
-        $field = Float::nullable();
-        $this->assertSame(true, $field->nullable);
-        $this->assertSame(false, $field->unsigned);
+        $field = FloatField::nullable();
+        $this->assertSame(true, $field->isNullable());
+        $this->assertSame(false, $field->isUnsigned());
     }
 
     public function testUnsigned()
     {
-        $field = Float::unsigned();
-        $this->assertSame(false, $field->nullable);
-        $this->assertSame(true, $field->unsigned);
+        $field = FloatField::unsigned();
+        $this->assertSame(false, $field->isNullable());
+        $this->assertSame(true, $field->isUnsigned());
     }
 
     public function testUnsignedInvalidDefault()
     {
         $this->setExpectedException('\InvalidArgumentException');
-        $field = Float::unsigned(-1);
+        $field = FloatField::unsigned(-1);
     }
 
     public function testUnsignedInvalidValue()
     {
         $this->setExpectedException('\InvalidArgumentException');
-        $field = Float::unsigned();
+        $field = FloatField::unsigned();
         $field->set(-1);
     }
 
     public function testUnsignedNullable()
     {
-        $field = Float::unsignedNullable();
-        $this->assertSame(true, $field->nullable);
-        $this->assertSame(true, $field->unsigned);
+        $field = FloatField::unsignedNullable();
+        $this->assertSame(true, $field->isNullable());
+        $this->assertSame(true, $field->isUnsigned());
     }
 }
