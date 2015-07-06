@@ -2,50 +2,100 @@
 
 namespace Data\Field;
 
-use Data\Type\Cast;
 use Data\Type\StringType;
+
+use LengthException;
+use InvalidArgumentException;
 
 class VarCharField extends StringType
 {
     /**
-     * Maximum length
      * @var int
      */
-    protected static $maxLength = 65535;
+    protected static $max_field_length = 65535;
 
     /**
-     * Actual maximum length
      * @var int
      */
-    protected $length = 255;
+    protected $field_length;
 
     /**
-     * Value can be null
      * @var bool
      */
-    protected $nullable = false;
+    protected $nullable;
 
-    public function __construct($length = 255, $default = null, $nullable = false)
+    /**
+     * @param int   $length
+     * @param mixed $default
+     * @param bool  $nullable
+     */
+    public function __construct($length, $default, $nullable, $encoding)
     {
-        try {
-            $this->length = Cast::pInt($length);
-        } catch (\Exception $e) {
-            throw new \InvalidArgumentException('Length must be 0 or positive integer, ' . $this->length . ' given');
+        if ($length < 1) {
+            throw new InvalidArgumentException('Length must be a positive integer, "' . $length . '" given');
         }
 
-        if ($this->length > static::$maxLength) {
-            throw new \InvalidArgumentException('Length (' . $this->length . ') is larger than maxLength (' . static::$maxLength . ')');
+        if ($length > static::$max_field_length) {
+            throw new InvalidArgumentException('Length is greater than max length (' . static::$max_field_length . '): "' . $length . '"');
         }
+        $this->field_length = (int) $length;
 
-        parent::__construct($default);
+        if ($nullable !== false && $nullable !== true) {
+            throw new InvalidArgumentException('Nullable must be bool');
+        }
+        $this->nullable = $nullable;
+
+        parent::__construct($default, $encoding);
     }
 
+    /**
+     * Create not null
+     *
+     * @param int   $length
+     * @param mixed $default
+     */
+    public static function notNull($length, $default = null, $encoding = null)
+    {
+        return new static($length, $default, false, $encoding);
+    }
+
+    /**
+     * Create nullable
+     *
+     * @param int   $length
+     * @param mixed $default
+     */
+    public static function nullable($length, $default = null, $encoding = null)
+    {
+        return new static($length, $default, true, $encoding);
+    }
+
+    /**
+     * Return the nullable property
+     *
+     * @return bool
+     */
+    public function isNullable()
+    {
+        return $this->nullable;
+    }
+
+    /**
+     * Check the value
+     *
+     * @param  mixed       $value
+     * @return string|null
+     */
     protected function check($value)
     {
-        $value = parent::check($value);
+        if ($value !== null) {
+            $value = parent::check($value);
 
-        if ($this->length < $this->length()) {
-            throw new \LengthException('Length of the string (' . $this->data->length . ') is larger than length of the field (' . $this->length . ')');
+            $length = mb_strlen($value, $this->encoding);
+
+            if ($length > $this->field_length) {
+                throw new LengthException('Length is greater than max length (' . $this->field_length . '): "' . $length . '"');
+            }
         }
 
         return $value;

@@ -2,82 +2,89 @@
 
 namespace Data\Field;
 
-use Data\Type\Cast;
 use Data\Type\FloatType;
+
+use InvalidArgumentException;
+use Data\Field\Exceptions\MinException;
+use Data\Field\Exceptions\MaxException;
+use Data\Field\Exceptions\UnsignedException;
 
 class FloatField extends FloatType
 {
     /**
-     * Value can be null
      * @var bool
      */
-    protected $nullable = false;
+    protected $nullable;
 
     /**
-     * Value must be unsigned
-     * @var boolean
+     * @var bool
      */
-    protected $unsigned = false;
+    protected $unsigned;
 
     /**
      * @param mixed $default
      * @param bool  $nullable
      * @param bool  $unsigned
      */
-    public function __construct($default, $nullable = false, $unsigned = false)
+    public function __construct($default, $nullable, $unsigned)
     {
-        $this->nullable = Cast::Bool($nullable);
-        $this->unsigned = Cast::Bool($unsigned);
+        if ($nullable !== false && $nullable !== true) {
+            throw new InvalidArgumentException('Nullable must be bool');
+        }
+        $this->nullable = $nullable;
 
-        parent::__construct($default);
+        if ($unsigned !== false && $unsigned !== true) {
+            throw new InvalidArgumentException('Unsigned must be bool');
+        }
+        $this->unsigned = $unsigned;
+
+        if ($default !== null) {
+            parent::__construct($default);
+        }
     }
 
     /**
-     * Signed factory
+     * Create signed, not null
      *
      * @param  mixed $default
      * @return this
      */
-    public static function signed($default = null)
+    public static function signedNotNull($default = null)
     {
-        $instance = new static($default);
-        return $instance;
+        return new static($default, false, false);
     }
 
     /**
-     * Nullable factory
+     * Create signed, nullable
      *
      * @param  mixed $default
      * @return this
      */
-    public static function nullable($default = null)
+    public static function signedNullable($default = null)
     {
-        $instance = new static($default, true);
-        return $instance;
+        return new static($default, true, false);
     }
 
     /**
-     * Unsigned factory
+     * Create unsigned, not null
      *
      * @param  mixed $default
      * @return this
      */
-    public static function unsigned($default = null)
+    public static function unsignedNotNull($default = null)
     {
-        $instance = new static($default, false, true);
-        return $instance;
+        return new static($default, false, true);
     }
 
     /**
-     * Unsigned, nullable factory
+     * Create unsigned, nullable
      *
      * @param  mixed $default
      * @return this
      */
     public static function unsignedNullable($default = null)
     {
-        $instance = new static($default, true, true);
-        return $instance;
+        return new static($default, true, true);
     }
 
     /**
@@ -103,17 +110,17 @@ class FloatField extends FloatType
     /**
      * Check the value
      *
-     * @param  mixed $value
-     * @return int
+     * @param  mixed      $value
+     * @return float|null
      */
     protected function check($value)
     {
-        $value = parent::check($value);
-
         if ($value !== null) {
+            $value = parent::check($value);
+
             if ($this->unsigned === true) {
                 if ($value < 0) {
-                    throw new \InvalidArgumentException('Unsigned field must be positive or zero, "' . $value . '" given');
+                    throw new MinException(0, $value);
                 }
             }
         }

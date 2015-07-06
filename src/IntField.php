@@ -2,88 +2,94 @@
 
 namespace Data\Field;
 
-use Data\Type\Cast;
 use Data\Type\IntType;
+
+use InvalidArgumentException;
+use Data\Field\Exceptions\MinException;
+use Data\Field\Exceptions\MaxException;
+use Data\Field\Exceptions\UnsignedException;
 
 class IntField extends IntType
 {
     /**
-     * Value can be null
      * @var bool
      */
-    protected $nullable = false;
+    protected $nullable;
 
     /**
-     * Value must be unsigned
-     * @var boolean
+     * @var bool
      */
-    protected $unsigned = false;
+    protected $unsigned;
 
     /**
-     * Maximum value
      * @var int
      */
-    protected static $max = 2147483647;
+    protected static $max_value = 2147483647;
 
     /**
      * @param mixed $default
      * @param bool  $nullable
      * @param bool  $unsigned
      */
-    public function __construct($default, $nullable = false, $unsigned = false)
+    public function __construct($default, $nullable, $unsigned)
     {
-        $this->nullable = Cast::Bool($nullable);
-        $this->unsigned = Cast::Bool($unsigned);
+        if ($nullable !== false && $nullable !== true) {
+            throw new InvalidArgumentException('Nullable must be bool');
+        }
+        $this->nullable = $nullable;
 
-        parent::__construct($default);
+        if ($unsigned !== false && $unsigned !== true) {
+            throw new InvalidArgumentException('Unsigned must be bool');
+        }
+        $this->unsigned = $unsigned;
+
+        if ($default !== null) {
+            parent::__construct($default);
+        }
     }
 
     /**
-     * Signed factory
+     * Create signed, not null
      *
      * @param  mixed $default
      * @return this
      */
-    public static function signed($default = null)
+    public static function signedNotNull($default = null)
     {
-        $instance = new static($default);
-        return $instance;
+        return new static($default, false, false);
     }
 
     /**
-     * Nullable factory
+     * Create signed, nullable
      *
      * @param  mixed $default
      * @return this
      */
-    public static function nullable($default = null)
+    public static function signedNullable($default = null)
     {
-        $instance = new static($default, true);
-        return $instance;
+        return new static($default, true, false);
     }
 
     /**
-     * Unsigned factory
+     * Create unsigned, not null
      *
      * @param  mixed $default
      * @return this
      */
-    public static function unsigned($default = null)
+    public static function unsignedNotNull($default = null)
     {
-        $instance = new static($default, false, true);
-        return $instance;
+        return new static($default, false, true);
     }
 
     /**
-     * Unsigned, nullable factory
+     * Create unsigned, nullable
      *
      * @param  mixed $default
      * @return this
      */
     public static function unsignedNullable($default = null)
     {
-        $instance = new static($default, true, true);
-        return $instance;
+        return new static($default, true, true);
     }
 
     /**
@@ -109,36 +115,28 @@ class IntField extends IntType
     /**
      * Check the value
      *
-     * @param  mixed $value
-     * @return int
+     * @param  mixed    $value
+     * @return int|null
      */
     protected function check($value)
     {
-        $value = parent::check($value);
-
         if ($value !== null) {
+            $value = parent::check($value);
+
+            $min = ~static::$max_value;
+            $max = static::$max_value;
+
             if ($this->unsigned === true) {
-                if ($value < 0) {
-                    throw new \InvalidArgumentException('Unsigned field must be positive or zero, "' . $value . '" given');
-                }
-
                 $min = 0;
-                if (static::$max < PHP_INT_MAX) {
-                    $max = static::$max * 2 + 1;
-                } else {
-                    $max = static::$max;
-                }
-            } else {
-                $min = ~static::$max;
-                $max = static::$max;
+                $max = $max * 2 + 1;
             }
 
-            if ($value !== null && $value < $min) {
-                throw new \InvalidArgumentException('Minimum value of the field is ' . $min . ', "' . $value . '" given');
+            if ($value < $min) {
+                throw new MinException($min, $value);
             }
 
-            if ($value !== null && $value > $max) {
-                throw new \InvalidArgumentException('Maximum value of the field is ' . $max . ', "' . $value . '" given');
+            if ($value > $max) {
+                throw new MaxException($max, $value);
             }
         }
 
