@@ -5,10 +5,10 @@ namespace Data\Field;
 use Data\Type\FloatType;
 
 use InvalidArgumentException;
-use Data\Field\Exceptions\MinException;
-use Data\Field\Exceptions\MaxException;
+use Data\Field\Exceptions\MinValueException;
+use Data\Field\Exceptions\MaxValueException;
 
-class DecimalField extends FloatType
+class DecimalField extends NumberField
 {
     /**
      * @var int 1-65
@@ -21,125 +21,93 @@ class DecimalField extends FloatType
     protected $scale;
 
     /**
-     * @var bool
+     * The value must be greater than this, not equal
+     * @var float
      */
-    protected $nullable;
+    protected $min_value;
 
     /**
-     * @var bool
+     * The value must be less than this, not equal
+     * @var float
      */
-    protected $unsigned;
+    protected $max_value;
 
     /**
-     * @param int   $precision 1-65
-     * @param int   $scale     0-30, <= $precision
-     * @param mixed $default
-     * @param bool  $nullable
-     * @param bool  $unsigned
+     * @param string $name
+     * @param int    $precision 1-65
+     * @param int    $scale     0-30, <= $precision
+     * @param mixed  $default
+     * @param bool   $nullable
+     * @param bool   $unsigned
      */
-    public function __construct($precision, $scale, $default, $nullable, $unsigned)
+    public function __construct($name, FloatType $data, $nullable, $unsigned, $precision, $scale)
     {
-        if ($precision >= 1 && $precision <= 65) {
-            $this->precision = (int) $precision;
-        } else {
-            throw new InvalidArgumentException('Precision must be between 1-65: "' . $precision . '"');
+        if (! is_int($precision) || $precision < 1 || $precision > 65) {
+            throw new InvalidArgumentException('Precision must int be between 1-65: "' . $precision . '"');
         }
 
-        if ($scale === 0 || ($scale >= 1 && $scale <= 30)) {
-            $this->scale = (int) $scale;
-        } else {
-            throw new InvalidArgumentException('Scale must be between 0-30: "' . $this->scale . '"');
+        if (! is_int($scale) || $scale < 0 || $scale > 30) {
+            throw new InvalidArgumentException('Scale must be int between 0-30: "' . $scale . '"');
         }
 
-        if ($this->scale > $this->precision) {
-            throw new InvalidArgumentException('Scale can\'t be greater than precision (precision: "' . $this->precision . '", scale: "' . $this->scale . '")');
+        if ($scale > $precision) {
+            throw new InvalidArgumentException('Scale is greater than precision: "' . $scale . ' > ' . $precision . '"');
+        }
+        $this->precision = $precision;
+        $this->scale = $scale;
+
+        parent::__construct($name, $data, $nullable, $unsigned);
+
+        $this->getMinValue();
+        $this->getMaxValue();
+    }
+
+    /**
+     * Check the value of the data when it's changing
+     */
+    protected function check()
+    {
+        parent::check();
+
+        if ($this->data()->lte($this->getMinValue())) {
+            throw new MinValueException('Value is equal or less than minimum value (' . $this->getMaxValue() . ') of the field "' . $this->name() . '": "' . $this->data() . '"');
         }
 
-        if ($nullable !== false && $nullable !== true) {
-            throw new InvalidArgumentException('Nullable must be bool');
-        }
-        $this->nullable = $nullable;
-
-        if ($unsigned !== false && $unsigned !== true) {
-            throw new InvalidArgumentException('Unsigned must be bool');
-        }
-        $this->unsigned = $unsigned;
-
-        if ($default !== null) {
-            parent::__construct($default);
+        if ($this->data()->gte($this->getMaxValue())) {
+            throw new MaxValueException('Value is equal or greater than maximum value (' . $this->getMaxValue() . ') of the field "' . $this->name() . '": "' . $this->data() . '"');
         }
     }
 
     /**
-     * Create signed, not null
+     * Minimum value
      *
-     * @param  int|null $precision 1-65
-     * @param  int|null $scale     0-30, <= $precision
-     * @param  mixed    $default
-     * @return this
+     * @return float
      */
-    public static function signedNotNull($precision = 10, $scale = 2, $default = null)
+    public function getMinValue()
     {
-        return new static($precision, $scale, $default, false, false);
+        if ($this->min_value === null) {
+            $this->min_value = 0.0;
+
+            if (! $this->isUnsigned()) {
+                $this->min_value = (float) ('-1.0e' . ($this->getPrecision() - $this->getScale()));
+            }
+        }
+
+        return $this->min_value;
     }
 
     /**
-     * Create signed, nullable
+     * Maximum value
      *
-     * @param  int|null $precision 1-65
-     * @param  int|null $scale     0-30, <= $precision
-     * @param  mixed    $default
-     * @return this
+     * @return float
      */
-    public static function signedNullable($precision = 10, $scale = 2, $default = null)
+    public function getMaxValue()
     {
-        return new static($precision, $scale, $default, true, false);
-    }
+        if ($this->max_value === null) {
+            $this->max_value = (float) ('1.0e' . ($this->getPrecision() - $this->getScale()));
+        }
 
-    /**
-     * Create unsigned, not null
-     *
-     * @param  int|null $precision 1-65
-     * @param  int|null $scale     0-30, <= $precision
-     * @param  mixed    $default
-     * @return this
-     */
-    public static function unsignedNotNull($precision = 10, $scale = 2, $default = null)
-    {
-        return new static($precision, $scale, $default, false, true);
-    }
-
-    /**
-     * Create unsigned, nullable
-     *
-     * @param  int   $precision 1-65
-     * @param  int   $scale     0-30, <= $precision
-     * @param  mixed $default
-     * @return this
-     */
-    public static function unsignedNullable($precision = 10, $scale = 2, $default = null)
-    {
-        return new static($precision, $scale, $default, true, true);
-    }
-
-    /**
-     * Return the nullable property
-     *
-     * @return bool
-     */
-    public function isNullable()
-    {
-        return $this->nullable;
-    }
-
-    /**
-     * Return the unsigned property
-     *
-     * @return bool
-     */
-    public function isUnsigned()
-    {
-        return $this->unsigned;
+        return $this->max_value;
     }
 
     /**
@@ -163,49 +131,54 @@ class DecimalField extends FloatType
     }
 
     /**
-     * The $value must be greater than this (not equal)
+     * Create signed, not null
      *
-     * @return float
+     * @param  string $name
+     * @param  int    $precision 1-65
+     * @param  int    $scale     0-30, <= $precision
+     * @param  mixed  $default
      */
-    public function getFieldMin()
+    public static function signedNotNull($name, $precision, $scale, $default = null)
     {
-        if ($this->isUnsigned()) {
-            return 0.0;
-        } else {
-            return (float) ('-1.0e' . ($this->precision - $this->scale));
-        }
+        return new static($name, new FloatType($default), false, false, $precision, $scale);
     }
 
     /**
-     * The $value must be less than this (not equal)
+     * Create signed, nullable
      *
-     * @return float
+     * @param  string $name
+     * @param  int    $precision 1-65
+     * @param  int    $scale     0-30, <= $precision
+     * @param  mixed  $default
      */
-    public function getFieldMax()
+    public static function signedNullable($name, $precision, $scale, $default = null)
     {
-        return (float) ('1.0e' . ($this->precision - $this->scale));
+        return new static($name, new FloatType($default), true, false, $precision, $scale);
     }
 
     /**
-     * Check the value
+     * Create unsigned, not null
      *
-     * @param  mixed      $value
-     * @return float|null
+     * @param  string $name
+     * @param  int    $precision 1-65
+     * @param  int    $scale     0-30, <= $precision
+     * @param  mixed  $default
      */
-    protected function check($value)
+    public static function unsignedNotNull($name, $precision, $scale, $default = null)
     {
-        if ($value !== null) {
-            $value = parent::check($value);
+        return new static($name, new FloatType($default), false, true, $precision, $scale);
+    }
 
-            if ( ! ($value > $this->getFieldMin())) {
-                throw new MinException($this->getFieldMin(), $value);
-            }
-
-            if ( ! ($value < $this->getFieldMax())) {
-                throw new MaxException($this->getFieldMax(), $value);
-            }
-        }
-
-        return $value;
+    /**
+     * Create unsigned, nullable
+     *
+     * @param  string $name
+     * @param  int    $precision 1-65
+     * @param  int    $scale     0-30, <= $precision
+     * @param  mixed  $default
+     */
+    public static function unsignedNullable($precision, $scale, $default = null)
+    {
+        return new static($name, new FloatType($default), true, true, $precision, $scale);
     }
 }

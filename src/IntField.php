@@ -5,141 +5,188 @@ namespace Data\Field;
 use Data\Type\IntType;
 
 use InvalidArgumentException;
-use Data\Field\Exceptions\MinException;
-use Data\Field\Exceptions\MaxException;
-use Data\Field\Exceptions\UnsignedException;
+use Data\Field\Exceptions\MinValueException;
+use Data\Field\Exceptions\MaxValueException;
 
-class IntField extends IntType
+class IntField extends NumberField
 {
     /**
-     * @var bool
+     * @var int
      */
-    protected $nullable;
+    const MAX_FIELD_VALUE = 2147483647;
 
     /**
      * @var bool
      */
-    protected $unsigned;
+    protected $serial;
 
     /**
      * @var int
      */
-    protected static $max_value = 2147483647;
+    protected $min_value;
 
     /**
-     * @param mixed $default
-     * @param bool  $nullable
-     * @param bool  $unsigned
+     * @var int
      */
-    public function __construct($default, $nullable, $unsigned)
+    protected $max_value;
+
+    /**
+     * @param string  $name
+     * @param IntType $data
+     * @param bool    $nullable
+     * @param bool    $unsigned
+     * @param bool    $serial
+     */
+    public function __construct($name, IntType $data, $nullable, $unsigned, $serial)
     {
-        if ($nullable !== false && $nullable !== true) {
-            throw new InvalidArgumentException('Nullable must be bool');
+        if (! is_bool($serial)) {
+            throw new InvalidArgumentException('Serial must be bool');
         }
-        $this->nullable = $nullable;
 
-        if ($unsigned !== false && $unsigned !== true) {
-            throw new InvalidArgumentException('Unsigned must be bool');
+        if ($serial === true && ! $data->isNull()) {
+            throw new InvalidArgumentException('Serial field\'s default value must be null: "' . $this->getData() . '"');
         }
-        $this->unsigned = $unsigned;
 
-        if ($default !== null) {
-            parent::__construct($default);
+        if ($serial === true && $nullable === true) {
+            throw new InvalidArgumentException('Serial field can\'t be nullable');
         }
+
+        if ($serial === true && $unsigned === false) {
+            throw new InvalidArgumentException('Serial field must be unsigned');
+        }
+
+        $this->serial = $serial;
+
+        parent::__construct($name, $data, $nullable, $unsigned);
+
+        $this->getMinValue();
+        $this->getMaxValue();
+    }
+
+    /**
+     * Check the value of the data when it's changing
+     */
+    protected function check()
+    {
+        parent::check();
+
+        if ($this->getData()->lt($this->getMinValue())) {
+            throw new MinValueException('Value less than the minimum value (' . $this->getMinValue() . ') of the field "' . $this->getName() . '": "' . $this->getData() . '"');
+        }
+
+        if ($this->getData()->gt($this->getMaxValue())) {
+            throw new MaxValueException('Value greater than the maximum value (' . $this->getMaxValue() . ') of the field "' . $this->getName() . '": "' . $this->getData() . '"');
+        }
+    }
+
+    /**
+     * Minimum value
+     *
+     * @return int
+     */
+    public function getMinValue()
+    {
+        if ($this->min_value === null) {
+            $min = ~$this->getMaxValue();
+
+            if ($this->isUnsigned()) {
+                $min = 0;
+                if ($this->isSerial()) {
+                    $min = 1;
+                }
+            }
+
+            $this->min_value = $min;
+        }
+
+        return $this->min_value;
+    }
+
+    /**
+     * Maximum value
+     *
+     * @return int
+     */
+    public function getMaxValue()
+    {
+        if ($this->max_value === null) {
+            $max = static::MAX_FIELD_VALUE;
+
+            if ($this->isUnsigned()) {
+                $max = $max * 2 + 1;
+            }
+
+            if ($max > PHP_INT_MAX) {
+                $max = PHP_INT_MAX;
+            }
+
+            $this->max_value = $max;
+        }
+
+        return $this->max_value;
+    }
+
+    /**
+     * Is this field serial?
+     *
+     * @return bool
+     */
+    public function isSerial()
+    {
+        return $this->serial === true;
     }
 
     /**
      * Create signed, not null
      *
-     * @param  mixed $default
-     * @return this
+     * @param string $name
+     * @param mixed  $default
      */
-    public static function signedNotNull($default = null)
+    public static function signedNotNull($name, $default = null)
     {
-        return new static($default, false, false);
+        return new static($name, new IntType($default), false, false, false);
     }
 
     /**
      * Create signed, nullable
      *
-     * @param  mixed $default
-     * @return this
+     * @param string $name
+     * @param mixed  $default
      */
-    public static function signedNullable($default = null)
+    public static function signedNullable($name, $default = null)
     {
-        return new static($default, true, false);
+        return new static($name, new IntType($default), true, false, false);
     }
 
     /**
      * Create unsigned, not null
      *
-     * @param  mixed $default
-     * @return this
+     * @param string $name
+     * @param mixed  $default
      */
-    public static function unsignedNotNull($default = null)
+    public static function unsignedNotNull($name, $default = null)
     {
-        return new static($default, false, true);
+        return new static($name, new IntType($default), false, true, false);
     }
 
     /**
      * Create unsigned, nullable
      *
-     * @param  mixed $default
-     * @return this
+     * @param string $name
+     * @param mixed  $default
      */
-    public static function unsignedNullable($default = null)
+    public static function unsignedNullable($name, $default = null)
     {
-        return new static($default, true, true);
+        return new static($name, new IntType($default), true, true, false);
     }
 
     /**
-     * Return the nullable property
+     * Create serial
      *
-     * @return bool
+     * @param string $name
      */
-    public function isNullable()
+    public static function serial($name)
     {
-        return $this->nullable;
-    }
-
-    /**
-     * Return the unsigned property
-     *
-     * @return bool
-     */
-    public function isUnsigned()
-    {
-        return $this->unsigned;
-    }
-
-    /**
-     * Check the value
-     *
-     * @param  mixed    $value
-     * @return int|null
-     */
-    protected function check($value)
-    {
-        if ($value !== null) {
-            $value = parent::check($value);
-
-            $min = ~static::$max_value;
-            $max = static::$max_value;
-
-            if ($this->unsigned === true) {
-                $min = 0;
-                $max = $max * 2 + 1;
-            }
-
-            if ($value < $min) {
-                throw new MinException($min, $value);
-            }
-
-            if ($value > $max) {
-                throw new MaxException($max, $value);
-            }
-        }
-
-        return $value;
+        return new static($name, new IntType(), false, true, true);
     }
 }
