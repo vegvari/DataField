@@ -56,10 +56,15 @@ class DecimalField extends NumberField
         $this->precision = $precision;
         $this->scale = $scale;
 
-        parent::__construct($name, $data, $nullable, $unsigned);
+        if ($unsigned === true) {
+            $this->min_value = 0.0;
+        } else {
+            $this->min_value = (float) ('-1.0e' . ($this->getPrecision() - $this->getScale()));
+        }
 
-        $this->getMinValue();
-        $this->getMaxValue();
+        $this->max_value = (float) ('1.0e' . ($this->getPrecision() - $this->getScale()));
+
+        parent::__construct($name, $data, $nullable, $unsigned);
     }
 
     /**
@@ -69,12 +74,14 @@ class DecimalField extends NumberField
     {
         parent::check();
 
-        if ($this->data()->lte($this->getMinValue())) {
-            throw new MinValueException('Value is equal or less than minimum value (' . $this->getMaxValue() . ') of the field "' . $this->name() . '": "' . $this->data() . '"');
+        if (! $this->isUnsigned() && ! $this->getData()->eq(0)) {
+            if ($this->getData()->lte($this->getMinValue())) {
+                throw new MinValueException('Value is equal or less than minimum value (' . $this->getMinValue() . ') of the field "' . $this->getName() . '": "' . $this->getData() . '"');
+            }
         }
 
-        if ($this->data()->gte($this->getMaxValue())) {
-            throw new MaxValueException('Value is equal or greater than maximum value (' . $this->getMaxValue() . ') of the field "' . $this->name() . '": "' . $this->data() . '"');
+        if ($this->getData()->gte($this->getMaxValue())) {
+            throw new MaxValueException('Value is equal or greater than maximum value (' . $this->getMaxValue() . ') of the field "' . $this->getName() . '": "' . $this->getData() . '"');
         }
     }
 
@@ -85,14 +92,6 @@ class DecimalField extends NumberField
      */
     public function getMinValue()
     {
-        if ($this->min_value === null) {
-            $this->min_value = 0.0;
-
-            if (! $this->isUnsigned()) {
-                $this->min_value = (float) ('-1.0e' . ($this->getPrecision() - $this->getScale()));
-            }
-        }
-
         return $this->min_value;
     }
 
@@ -103,10 +102,6 @@ class DecimalField extends NumberField
      */
     public function getMaxValue()
     {
-        if ($this->max_value === null) {
-            $this->max_value = (float) ('1.0e' . ($this->getPrecision() - $this->getScale()));
-        }
-
         return $this->max_value;
     }
 
@@ -177,7 +172,7 @@ class DecimalField extends NumberField
      * @param  int    $scale     0-30, <= $precision
      * @param  mixed  $default
      */
-    public static function unsignedNullable($precision, $scale, $default = null)
+    public static function unsignedNullable($name, $precision, $scale, $default = null)
     {
         return new static($name, new FloatType($default), true, true, $precision, $scale);
     }

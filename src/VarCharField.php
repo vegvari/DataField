@@ -2,10 +2,6 @@
 
 namespace Data\Field;
 
-use Data\Type\StringType;
-
-use InvalidArgumentException;
-
 class VarCharField extends CharField
 {
     /**
