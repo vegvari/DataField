@@ -19,7 +19,7 @@ abstract class StringField extends Field
      */
     public function __construct($name, StringType $data, $nullable)
     {
-        $this->max_length = self::MAX_FIELD_LENGTH;
+        $this->max_length = static::MAX_FIELD_LENGTH;
         parent::__construct($name, $data, $nullable);
     }
 
@@ -28,8 +28,8 @@ abstract class StringField extends Field
      */
     public function check()
     {
-        if ($this->data()->length() > $this->getMaxLength()) {
-            throw new MaxLengthException('Value is longer than the maximum length (' . $this->getMaxLength() . ') of the field "' . $this->name() . '": "' . $this->data()->length() . '"');
+        if ($this->getData()->length() > $this->getMaxLength()) {
+            throw new MaxLengthException('Value is longer than the maximum length (' . $this->getMaxLength() . ') of the field "' . $this->getName() . '": "' . $this->getData()->length() . '"');
         }
     }
 
@@ -38,7 +38,7 @@ abstract class StringField extends Field
      *
      * @return int
      */
-    public funciton getMaxLength()
+    public function getMaxLength()
     {
         return $this->max_length;
     }
