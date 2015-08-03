@@ -28,11 +28,6 @@ abstract class Field implements SplObserver
     /**
      * @var bool
      */
-    protected $changed = false;
-
-    /**
-     * @var bool
-     */
     protected $nullable;
 
     /**
@@ -42,8 +37,8 @@ abstract class Field implements SplObserver
      */
     public function __construct($name, Type $data, $nullable)
     {
-        if (! is_string($name)) {
-            throw new InvalidArgumentException('Name must be string');
+        if (! is_string($name) || strlen($name) < 1) {
+            throw new InvalidArgumentException('Name must be string, at least one character long');
         }
 
         if (! is_bool($nullable)) {
@@ -99,19 +94,9 @@ abstract class Field implements SplObserver
     {
         if (! $subject->isNull()) {
             $this->check();
+        } elseif (! $this->isNullable()) {
+            $subject->set($this->getDefault());
         }
-
-        $this->changed = true;
-    }
-
-    /**
-     * Is this field changed?
-     *
-     * @return bool
-     */
-    public function isChanged()
-    {
-        return $this->changed === true;
     }
 
     /**

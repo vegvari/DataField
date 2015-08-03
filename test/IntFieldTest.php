@@ -9,323 +9,174 @@ use Data\Field\IntField;
 class IntFieldTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var int
-     */
-    protected $signed_max = 2147483647;
-
-    /**
-     * @var int
-     */
-    protected $unsigned_max = 4294967295;
-
-    /**
-     * @var int
-     */
-    protected $serial_max = 4294967295;
-
-    /**
      * @test
-     * @covers \Data\Field\Field::__construct
-     * @covers \Data\Field\Field::getName
-     * @covers \Data\Field\Field::getData
-     * @covers \Data\Field\Field::getDefault
-     * @covers \Data\Field\Field::isNullable
-     * @covers \Data\Field\NumberField::__construct
-     * @covers \Data\Field\NumberField::isUnsigned
-     * @covers ::__construct
-     * @covers ::getMinValue
-     * @covers ::getMaxValue
-     * @covers ::isChanged
-     * @covers ::isSerial
      */
     public function construct()
     {
-        $data = new IntType();
 
-        $instance = new IntField('test', $data, false, false, false);
-        $this->assertSame(false, $instance->isChanged());
-        $this->assertSame('test', $instance->getName());
-        $this->assertSame($data, $instance->getData());
-        $this->assertSame(null, $instance->getDefault());
-        $this->assertSame(false, $instance->isNullable());
-        $this->assertSame(false, $instance->isUnsigned());
-        $this->assertSame(false, $instance->isSerial());
-        $this->assertSame(~$this->signed_max, $instance->getMinValue());
-        $this->assertSame($this->signed_max, $instance->getMaxValue());
-
-        $instance = new IntField('test', $data, true, true, false);
-        $this->assertSame(false, $instance->isChanged());
-        $this->assertSame(true, $instance->isNullable());
-        $this->assertSame(true, $instance->isUnsigned());
-        $this->assertSame(false, $instance->isSerial());
-        $this->assertSame(0, $instance->getMinValue());
-        $this->assertSame($this->unsigned_max, $instance->getMaxValue());
-
-        $instance = new IntField('test', $data, true, false, false);
-        $this->assertSame(false, $instance->isChanged());
-        $this->assertSame(true, $instance->isNullable());
-        $this->assertSame(false, $instance->isUnsigned());
-        $this->assertSame(false, $instance->isSerial());
-        $this->assertSame(~$this->signed_max, $instance->getMinValue());
-        $this->assertSame($this->signed_max, $instance->getMaxValue());
-
-        $instance = new IntField('test', $data, false, true, false);
-        $this->assertSame(false, $instance->isChanged());
-        $this->assertSame(false, $instance->isNullable());
-        $this->assertSame(true, $instance->isUnsigned());
-        $this->assertSame(false, $instance->isSerial());
-        $this->assertSame(0, $instance->getMinValue());
-        $this->assertSame($this->unsigned_max, $instance->getMaxValue());
-
-        $instance = new IntField('test', $data, false, true, true);
-        $this->assertSame(false, $instance->isChanged());
+        $instance = new IntField('test', new IntType(), false, true, true);
         $this->assertSame(false, $instance->isNullable());
         $this->assertSame(true, $instance->isUnsigned());
         $this->assertSame(true, $instance->isSerial());
-        $this->assertSame(1, $instance->getMinValue());
-        $this->assertSame($this->serial_max, $instance->getMaxValue());
+        $this->assertSame(IntField::MIN_FIELD_VALUE_SERIAL, $instance->getMinValue());
+        $this->assertSame(IntField::MAX_FIELD_VALUE_SERIAL, $instance->getMaxValue());
     }
 
     /**
      * @test
-     * @covers \Data\Field\Field::__construct
-     * @covers \Data\Field\Field::getName
-     * @covers \Data\Field\Field::getData
-     * @covers \Data\Field\Field::getDefault
-     * @covers \Data\Field\Field::update
-     * @covers \Data\Field\Field::isChanged
-     * @covers \Data\Field\Field::isNullable
-     * @covers \Data\Field\NumberField::__construct
-     * @covers \Data\Field\NumberField::check
-     * @covers \Data\Field\NumberField::isUnsigned
-     * @covers ::__construct
-     * @covers ::check
-     * @covers ::getMinValue
-     * @covers ::getMaxValue
-     * @covers ::isSerial
-     * @covers ::signedNotNull
      */
     public function signedNotNull()
     {
-        $instance = IntField::signedNotNull('test');
+        $instance = new IntField('test', new IntType(), false, false, false);
         $this->assertSame('test', $instance->getName());
+        $this->assertSame(true, $instance->getData() instanceof IntType);
         $this->assertSame(null, $instance->getDefault());
-        $this->assertSame(true, $instance->getData()->isNull());
         $this->assertSame(false, $instance->isNullable());
         $this->assertSame(false, $instance->isUnsigned());
         $this->assertSame(false, $instance->isSerial());
-        $this->assertSame(~$this->signed_max, $instance->getMinValue());
-        $this->assertSame($this->signed_max, $instance->getMaxValue());
+        $this->assertSame(IntField::MIN_FIELD_VALUE_SIGNED, $instance->getMinValue());
+        $this->assertSame(IntField::MAX_FIELD_VALUE_SIGNED, $instance->getMaxValue());
 
-        $instance = IntField::signedNotNull('test', 1);
-        $this->assertSame(1, $instance->getData()->value());
-        $this->assertSame(1, $instance->getDefault());
-
-        $instance->getData()->set(null);
-        $this->assertSame(true, $instance->isChanged());
-
-        $instance->getData()->set(1);
-        $this->assertSame(true, $instance->isChanged());
+        $instance = IntField::signedNotNull('test', 12);
+        $this->assertSame('test', $instance->getName());
+        $this->assertSame(true, $instance->getData() instanceof IntType);
+        $this->assertSame(12, $instance->getDefault());
+        $this->assertSame(false, $instance->isNullable());
+        $this->assertSame(false, $instance->isUnsigned());
+        $this->assertSame(false, $instance->isSerial());
+        $this->assertSame(~IntField::MAX_FIELD_VALUE_SIGNED, $instance->getMinValue());
+        $this->assertSame(IntField::MAX_FIELD_VALUE_SIGNED, $instance->getMaxValue());
     }
 
     /**
      * @test
-     * @covers \Data\Field\Field::__construct
-     * @covers \Data\Field\Field::getName
-     * @covers \Data\Field\Field::getData
-     * @covers \Data\Field\Field::getDefault
-     * @covers \Data\Field\Field::isNullable
-     * @covers \Data\Field\NumberField::__construct
-     * @covers \Data\Field\NumberField::check
-     * @covers \Data\Field\NumberField::isUnsigned
-     * @covers ::__construct
-     * @covers ::check
-     * @covers ::getMinValue
-     * @covers ::getMaxValue
-     * @covers ::isSerial
-     * @covers ::signedNullable
      */
     public function signedNullable()
     {
-        $instance = IntField::signedNullable('test');
+        $instance = new IntField('test', new IntType(), true, false, false);
         $this->assertSame('test', $instance->getName());
-        $this->assertSame(true, $instance->getData()->isNull());
+        $this->assertSame(true, $instance->getData() instanceof IntType);
         $this->assertSame(null, $instance->getDefault());
         $this->assertSame(true, $instance->isNullable());
         $this->assertSame(false, $instance->isUnsigned());
         $this->assertSame(false, $instance->isSerial());
-        $this->assertSame(~$this->signed_max, $instance->getMinValue());
-        $this->assertSame($this->signed_max, $instance->getMaxValue());
+        $this->assertSame(IntField::MIN_FIELD_VALUE_SIGNED, $instance->getMinValue());
+        $this->assertSame(IntField::MAX_FIELD_VALUE_SIGNED, $instance->getMaxValue());
 
-        $instance = IntField::signedNullable('test', 1);
-        $this->assertSame(1, $instance->getData()->value());
-        $this->assertSame(1, $instance->getDefault());
+        $instance = IntField::signedNullable('test', 12);
+        $this->assertSame('test', $instance->getName());
+        $this->assertSame(true, $instance->getData() instanceof IntType);
+        $this->assertSame(12, $instance->getDefault());
+        $this->assertSame(true, $instance->isNullable());
+        $this->assertSame(false, $instance->isUnsigned());
+        $this->assertSame(false, $instance->isSerial());
+        $this->assertSame(IntField::MIN_FIELD_VALUE_SIGNED, $instance->getMinValue());
+        $this->assertSame(IntField::MAX_FIELD_VALUE_SIGNED, $instance->getMaxValue());
     }
 
     /**
      * @test
-     * @covers \Data\Field\Field::__construct
-     * @covers \Data\Field\Field::getName
-     * @covers \Data\Field\Field::getData
-     * @covers \Data\Field\Field::getDefault
-     * @covers \Data\Field\Field::isNullable
-     * @covers \Data\Field\NumberField::__construct
-     * @covers \Data\Field\NumberField::check
-     * @covers \Data\Field\NumberField::isUnsigned
-     * @covers ::__construct
-     * @covers ::check
-     * @covers ::getMinValue
-     * @covers ::getMaxValue
-     * @covers ::isSerial
-     * @covers ::unsignedNotNull
      */
     public function unsignedNotNull()
     {
-        $instance = IntField::unsignedNotNull('test');
+        $instance = new IntField('test', new IntType(), false, true, false);
         $this->assertSame('test', $instance->getName());
-        $this->assertSame(true, $instance->getData()->isNull());
+        $this->assertSame(true, $instance->getData() instanceof IntType);
         $this->assertSame(null, $instance->getDefault());
         $this->assertSame(false, $instance->isNullable());
         $this->assertSame(true, $instance->isUnsigned());
         $this->assertSame(false, $instance->isSerial());
-        $this->assertSame(0, $instance->getMinValue());
-        $this->assertSame($this->unsigned_max, $instance->getMaxValue());
+        $this->assertSame(IntField::MIN_FIELD_VALUE_UNSIGNED, $instance->getMinValue());
+        $this->assertSame(IntField::MAX_FIELD_VALUE_UNSIGNED, $instance->getMaxValue());
 
-        $instance = IntField::unsignedNotNull('test', 1);
-        $this->assertSame(1, $instance->getData()->value());
-        $this->assertSame(1, $instance->getDefault());
+        $instance = IntField::unsignedNotNull('test', 12);
+        $this->assertSame('test', $instance->getName());
+        $this->assertSame(true, $instance->getData() instanceof IntType);
+        $this->assertSame(12, $instance->getDefault());
+        $this->assertSame(false, $instance->isNullable());
+        $this->assertSame(true, $instance->isUnsigned());
+        $this->assertSame(false, $instance->isSerial());
+        $this->assertSame(IntField::MIN_FIELD_VALUE_UNSIGNED, $instance->getMinValue());
+        $this->assertSame(IntField::MAX_FIELD_VALUE_UNSIGNED, $instance->getMaxValue());
     }
 
     /**
      * @test
-     * @covers \Data\Field\Field::__construct
-     * @covers \Data\Field\Field::getName
-     * @covers \Data\Field\Field::getData
-     * @covers \Data\Field\Field::getDefault
-     * @covers \Data\Field\Field::isNullable
-     * @covers \Data\Field\NumberField::__construct
-     * @covers \Data\Field\NumberField::check
-     * @covers \Data\Field\NumberField::isUnsigned
-     * @covers ::__construct
-     * @covers ::check
-     * @covers ::getMinValue
-     * @covers ::getMaxValue
-     * @covers ::isSerial
-     * @covers ::unsignedNullable
      */
     public function unsignedNullable()
     {
-        $instance = IntField::unsignedNullable('test');
+        $instance = new IntField('test', new IntType(), true, true, false);
         $this->assertSame('test', $instance->getName());
-        $this->assertSame(true, $instance->getData()->isNull());
+        $this->assertSame(true, $instance->getData() instanceof IntType);
         $this->assertSame(null, $instance->getDefault());
         $this->assertSame(true, $instance->isNullable());
         $this->assertSame(true, $instance->isUnsigned());
         $this->assertSame(false, $instance->isSerial());
-        $this->assertSame(0, $instance->getMinValue());
-        $this->assertSame($this->unsigned_max, $instance->getMaxValue());
+        $this->assertSame(IntField::MIN_FIELD_VALUE_UNSIGNED, $instance->getMinValue());
+        $this->assertSame(IntField::MAX_FIELD_VALUE_UNSIGNED, $instance->getMaxValue());
 
-        $instance = IntField::unsignedNullable('test', 1);
-        $this->assertSame(1, $instance->getData()->value());
-        $this->assertSame(1, $instance->getDefault());
+        $instance = IntField::unsignedNullable('test', 12);
+        $this->assertSame('test', $instance->getName());
+        $this->assertSame(true, $instance->getData() instanceof IntType);
+        $this->assertSame(12, $instance->getDefault());
+        $this->assertSame(true, $instance->isNullable());
+        $this->assertSame(true, $instance->isUnsigned());
+        $this->assertSame(false, $instance->isSerial());
+        $this->assertSame(IntField::MIN_FIELD_VALUE_UNSIGNED, $instance->getMinValue());
+        $this->assertSame(IntField::MAX_FIELD_VALUE_UNSIGNED, $instance->getMaxValue());
     }
 
     /**
      * @test
-     * @covers \Data\Field\Field::__construct
-     * @covers \Data\Field\Field::getName
-     * @covers \Data\Field\Field::getData
-     * @covers \Data\Field\Field::getDefault
-     * @covers \Data\Field\Field::isNullable
-     * @covers \Data\Field\NumberField::__construct
-     * @covers \Data\Field\NumberField::check
-     * @covers \Data\Field\NumberField::isUnsigned
-     * @covers ::__construct
-     * @covers ::check
-     * @covers ::getMinValue
-     * @covers ::getMaxValue
-     * @covers ::isSerial
-     * @covers ::serial
      */
     public function serial()
     {
-        $instance = IntField::serial('test');
+        $instance = new IntField('test', new IntType(), false, true, true);
         $this->assertSame('test', $instance->getName());
-        $this->assertSame(true, $instance->getData()->isNull());
+        $this->assertSame(true, $instance->getData() instanceof IntType);
         $this->assertSame(null, $instance->getDefault());
         $this->assertSame(false, $instance->isNullable());
         $this->assertSame(true, $instance->isUnsigned());
         $this->assertSame(true, $instance->isSerial());
-        $this->assertSame(1, $instance->getMinValue());
-        $this->assertSame($this->serial_max, $instance->getMaxValue());
+        $this->assertSame(IntField::MIN_FIELD_VALUE_SERIAL, $instance->getMinValue());
+        $this->assertSame(IntField::MAX_FIELD_VALUE_SERIAL, $instance->getMaxValue());
 
-        $instance = IntField::serial('test', 1);
-        $this->assertSame(null, $instance->getData()->value());
+        $instance = IntField::serial('test', 12);
+        $this->assertSame('test', $instance->getName());
+        $this->assertSame(true, $instance->getData() instanceof IntType);
         $this->assertSame(null, $instance->getDefault());
+        $this->assertSame(false, $instance->isNullable());
+        $this->assertSame(true, $instance->isUnsigned());
+        $this->assertSame(true, $instance->isSerial());
+        $this->assertSame(IntField::MIN_FIELD_VALUE_SERIAL, $instance->getMinValue());
+        $this->assertSame(IntField::MAX_FIELD_VALUE_SERIAL, $instance->getMaxValue());
     }
 
     /**
      * @test
      * @dataProvider constructFailProvider
-     * @covers       \Data\Field\Field::__construct
-     * @covers       \Data\Field\Field::getName
-     * @covers       \Data\Field\Field::getData
-     * @covers       \Data\Field\NumberField::__construct
-     * @covers       \Data\Field\NumberField::check
-     * @covers       \Data\Field\NumberField::isUnsigned
-     * @covers       ::__construct
-     * @covers       ::check
-     * @covers       ::signedNotNull
-     * @covers       ::signedNullable
-     * @covers       ::unsignedNotNull
-     * @covers       ::unsignedNullable
-     * @covers       ::serial
      */
-    public function constructFail(Closure $closure, $expected)
+    public function constructFail(Closure $closure, $expected, $message)
     {
-        $this->setExpectedException($expected);
+        $this->setExpectedException($expected, $message);
         $closure();
     }
 
     public function constructFailProvider()
     {
         return [
-            [function () { return new IntField(1, new IntType(), false, false, false); }, 'InvalidArgumentException'],
-            [function () { return new IntField('test', new IntType(), 1, false, false); }, 'InvalidArgumentException'],
-            [function () { return new IntField('test', new IntType(), false, 1, false); }, 'InvalidArgumentException'],
-            [function () { return new IntField('test', new IntType(), false, false, 1); }, 'InvalidArgumentException'],
-            [function () { return new IntField('test', new IntType(), false, false, true); }, 'InvalidArgumentException'],
-            [function () { return new IntField('test', new IntType(), true, true, true); }, 'InvalidArgumentException'],
-            [function () { return new IntField('test', new IntType(), true, false, true); }, 'InvalidArgumentException'],
-            [function () { return new IntField('test', new IntType(1), false, true, true); }, 'InvalidArgumentException'],
-            [function () { return IntField::signedNotNull(1); }, 'InvalidArgumentException'],
-            [function () { return IntField::signedNullable(1); }, 'InvalidArgumentException'],
-            [function () { return IntField::unsignedNotNull(1); }, 'InvalidArgumentException'],
-            [function () { return IntField::unsignedNullable(1); }, 'InvalidArgumentException'],
-            [function () { return IntField::serial(1); }, 'InvalidArgumentException'],
+            [function () { return new IntField('test', new IntType(), false, 1, false); }, 'InvalidArgumentException', 'Unsigned must be bool'],
+            [function () { return new IntField('test', new IntType(), false, false, 1); }, 'InvalidArgumentException', 'Serial must be bool'],
+            [function () { return new IntField('test', new IntType(), false, false, true); }, 'InvalidArgumentException', 'Serial field must be unsigned'],
+            [function () { return new IntField('test', new IntType(), true, true, true); }, 'InvalidArgumentException', 'Serial field can\'t be nullable'],
+            [function () { return new IntField('test', new IntType(), true, false, true); }, 'InvalidArgumentException', 'Serial field can\'t be nullable'],
+            [function () { return new IntField('test', new IntType(1), false, true, true); }, 'InvalidArgumentException', 'Serial field\'s default value must be null: "1"'],
         ];
     }
 
     /**
      * @test
      * @dataProvider checkFailProvider
-     * @covers       \Data\Field\Field::__construct
-     * @covers       \Data\Field\Field::getName
-     * @covers       \Data\Field\Field::getData
-     * @covers       \Data\Field\Field::update
-     * @covers       \Data\Field\NumberField::__construct
-     * @covers       \Data\Field\NumberField::check
-     * @covers       \Data\Field\NumberField::isUnsigned
-     * @covers       ::__construct
-     * @covers       ::check
-     * @covers       ::getMinValue
-     * @covers       ::getMaxValue
-     * @covers       ::isSerial
-     * @covers       ::signedNotNull
-     * @covers       ::signedNullable
-     * @covers       ::unsignedNotNull
-     * @covers       ::unsignedNullable
-     * @covers       ::serial
      */
     public function checkFail(Closure $closure, $expected)
     {
@@ -336,26 +187,26 @@ class IntFieldTest extends PHPUnit_Framework_TestCase
     public function checkFailProvider()
     {
         return [
-            [function () { return IntField::signedNullable('test', ~$this->signed_max - 1); }, 'Data\Field\Exceptions\MinValueException'],
-            [function () { return IntField::signedNotNull('test', ~$this->signed_max - 1); }, 'Data\Field\Exceptions\MinValueException'],
-            [function () { $field = IntField::signedNullable('test'); $field->getData()->set(~$this->signed_max - 1); return $field; }, 'Data\Field\Exceptions\MinValueException'],
-            [function () { $field = IntField::signedNotNull('test'); $field->getData()->set(~$this->signed_max - 1); return $field; }, 'Data\Field\Exceptions\MinValueException'],
-            [function () { return IntField::signedNullable('test', $this->signed_max + 1); }, 'Data\Field\Exceptions\MaxValueException'],
-            [function () { return IntField::signedNotNull('test', $this->signed_max + 1); }, 'Data\Field\Exceptions\MaxValueException'],
-            [function () { $field = IntField::signedNullable('test'); $field->getData()->set($this->signed_max + 1); return $field; }, 'Data\Field\Exceptions\MaxValueException'],
-            [function () { $field = IntField::signedNotNull('test'); $field->getData()->set($this->signed_max + 1); return $field; }, 'Data\Field\Exceptions\MaxValueException'],
+            [function () { return IntField::signedNullable('test', ~IntField::MAX_FIELD_VALUE_SIGNED - 1); }, 'Data\Field\Exceptions\MinValueException'],
+            [function () { return IntField::signedNotNull('test', ~IntField::MAX_FIELD_VALUE_SIGNED - 1); }, 'Data\Field\Exceptions\MinValueException'],
+            [function () { $field = IntField::signedNullable('test'); $field->getData()->set(~IntField::MAX_FIELD_VALUE_SIGNED - 1); return $field; }, 'Data\Field\Exceptions\MinValueException'],
+            [function () { $field = IntField::signedNotNull('test'); $field->getData()->set(~IntField::MAX_FIELD_VALUE_SIGNED - 1); return $field; }, 'Data\Field\Exceptions\MinValueException'],
+            [function () { return IntField::signedNullable('test', IntField::MAX_FIELD_VALUE_SIGNED + 1); }, 'Data\Field\Exceptions\MaxValueException'],
+            [function () { return IntField::signedNotNull('test', IntField::MAX_FIELD_VALUE_SIGNED + 1); }, 'Data\Field\Exceptions\MaxValueException'],
+            [function () { $field = IntField::signedNullable('test'); $field->getData()->set(IntField::MAX_FIELD_VALUE_SIGNED + 1); return $field; }, 'Data\Field\Exceptions\MaxValueException'],
+            [function () { $field = IntField::signedNotNull('test'); $field->getData()->set(IntField::MAX_FIELD_VALUE_SIGNED + 1); return $field; }, 'Data\Field\Exceptions\MaxValueException'],
 
-            [function () { return IntField::unsignedNullable('test', 0 - 1); }, 'Data\Field\Exceptions\MinValueException'],
-            [function () { return IntField::unsignedNotNull('test', 0 - 1); }, 'Data\Field\Exceptions\MinValueException'],
-            [function () { $field = IntField::unsignedNullable('test'); $field->getData()->set(-1); return $field; }, 'Data\Field\Exceptions\MinValueException'],
-            [function () { $field = IntField::unsignedNotNull('test'); $field->getData()->set(-1); return $field; }, 'Data\Field\Exceptions\MinValueException'],
-            [function () { return IntField::unsignedNullable('test', $this->unsigned_max + 1); }, 'Data\Field\Exceptions\MaxValueException'],
-            [function () { return IntField::unsignedNotNull('test', $this->unsigned_max + 1); }, 'Data\Field\Exceptions\MaxValueException'],
-            [function () { $field = IntField::unsignedNullable('test'); $field->getData()->set($this->unsigned_max + 1); return $field; }, 'Data\Field\Exceptions\MaxValueException'],
-            [function () { $field = IntField::unsignedNotNull('test'); $field->getData()->set($this->unsigned_max + 1); return $field; }, 'Data\Field\Exceptions\MaxValueException'],
+            [function () { return IntField::unsignedNullable('test', IntField::MIN_FIELD_VALUE_UNSIGNED - 1); }, 'Data\Field\Exceptions\MinValueException'],
+            [function () { return IntField::unsignedNotNull('test', IntField::MIN_FIELD_VALUE_UNSIGNED - 1); }, 'Data\Field\Exceptions\MinValueException'],
+            [function () { $field = IntField::unsignedNullable('test'); $field->getData()->set(IntField::MIN_FIELD_VALUE_UNSIGNED - 1); return $field; }, 'Data\Field\Exceptions\MinValueException'],
+            [function () { $field = IntField::unsignedNotNull('test'); $field->getData()->set(IntField::MIN_FIELD_VALUE_UNSIGNED - 1); return $field; }, 'Data\Field\Exceptions\MinValueException'],
+            [function () { return IntField::unsignedNullable('test', IntField::MAX_FIELD_VALUE_UNSIGNED + 1); }, 'Data\Field\Exceptions\MaxValueException'],
+            [function () { return IntField::unsignedNotNull('test', IntField::MAX_FIELD_VALUE_UNSIGNED + 1); }, 'Data\Field\Exceptions\MaxValueException'],
+            [function () { $field = IntField::unsignedNullable('test'); $field->getData()->set(IntField::MAX_FIELD_VALUE_UNSIGNED + 1); return $field; }, 'Data\Field\Exceptions\MaxValueException'],
+            [function () { $field = IntField::unsignedNotNull('test'); $field->getData()->set(IntField::MAX_FIELD_VALUE_UNSIGNED + 1); return $field; }, 'Data\Field\Exceptions\MaxValueException'],
 
-            [function () { $field = IntField::serial('test'); $field->getData()->set(0); return $field; }, 'Data\Field\Exceptions\MinValueException'],
-            [function () { $field = IntField::serial('test'); $field->getData()->set($this->serial_max + 1); return $field; }, 'Data\Field\Exceptions\MaxValueException'],
+            [function () { $field = IntField::serial('test'); $field->getData()->set(IntField::MIN_FIELD_VALUE_SERIAL - 1); return $field; }, 'Data\Field\Exceptions\MinValueException'],
+            [function () { $field = IntField::serial('test'); $field->getData()->set(IntField::MAX_FIELD_VALUE_SERIAL + 1); return $field; }, 'Data\Field\Exceptions\MaxValueException'],
         ];
     }
 }

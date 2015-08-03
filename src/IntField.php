@@ -13,22 +13,37 @@ class IntField extends NumberField
     /**
      * @var int
      */
-    const MAX_FIELD_VALUE = 2147483647;
+    const MIN_FIELD_VALUE_SIGNED = -2147483648;
+
+    /**
+     * @var int
+     */
+    const MAX_FIELD_VALUE_SIGNED = 2147483647;
+
+    /**
+     * @var int
+     */
+    const MIN_FIELD_VALUE_UNSIGNED = 0;
+
+    /**
+     * @var int
+     */
+    const MAX_FIELD_VALUE_UNSIGNED = 4294967295;
+
+    /**
+     * @var int
+     */
+    const MIN_FIELD_VALUE_SERIAL = 1;
+
+    /**
+     * @var int
+     */
+    const MAX_FIELD_VALUE_SERIAL = 4294967295;
 
     /**
      * @var bool
      */
     protected $serial;
-
-    /**
-     * @var int
-     */
-    protected $min_value;
-
-    /**
-     * @var int
-     */
-    protected $max_value;
 
     /**
      * @param string  $name
@@ -44,7 +59,7 @@ class IntField extends NumberField
         }
 
         if ($serial === true && ! $data->isNull()) {
-            throw new InvalidArgumentException('Serial field\'s default value must be null: "' . $this->getData() . '"');
+            throw new InvalidArgumentException('Serial field\'s default value must be null: "' . $data . '"');
         }
 
         if ($serial === true && $nullable === true) {
@@ -58,9 +73,6 @@ class IntField extends NumberField
         $this->serial = $serial;
 
         parent::__construct($name, $data, $nullable, $unsigned);
-
-        $this->getMinValue();
-        $this->getMaxValue();
     }
 
     /**
@@ -86,20 +98,13 @@ class IntField extends NumberField
      */
     public function getMinValue()
     {
-        if ($this->min_value === null) {
-            $min = ~$this->getMaxValue();
-
-            if ($this->isUnsigned()) {
-                $min = 0;
-                if ($this->isSerial()) {
-                    $min = 1;
-                }
-            }
-
-            $this->min_value = $min;
+        if ($this->isSerial()) {
+            return static::MIN_FIELD_VALUE_SERIAL;
+        } elseif ($this->isUnsigned()) {
+            return static::MIN_FIELD_VALUE_UNSIGNED;
         }
 
-        return $this->min_value;
+        return static::MIN_FIELD_VALUE_SIGNED;
     }
 
     /**
@@ -109,21 +114,13 @@ class IntField extends NumberField
      */
     public function getMaxValue()
     {
-        if ($this->max_value === null) {
-            $max = static::MAX_FIELD_VALUE;
-
-            if ($this->isUnsigned()) {
-                $max = $max * 2 + 1;
-            }
-
-            if ($max > PHP_INT_MAX) {
-                $max = PHP_INT_MAX;
-            }
-
-            $this->max_value = $max;
+        if ($this->isSerial()) {
+            return static::MAX_FIELD_VALUE_SERIAL;
+        } elseif ($this->isUnsigned()) {
+            return static::MAX_FIELD_VALUE_UNSIGNED;
         }
 
-        return $this->max_value;
+        return static::MAX_FIELD_VALUE_SIGNED;
     }
 
     /**
