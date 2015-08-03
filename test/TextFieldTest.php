@@ -50,10 +50,18 @@ class TextFieldTest extends PHPUnit_Framework_TestCase
 
     /**
      * @test
+     * @dataProvider checkFailProvider
      */
-    public function constructFail()
+    public function checkFail(Closure $closure, $expected)
     {
-        $this->setExpectedException('\Data\Field\Exceptions\MaxLengthException');
-        $instance = new TextField('test', new StringType(str_repeat('a', TextField::MAX_FIELD_LENGTH + 1)), false);
+        $this->setExpectedException($expected);
+        $closure();
+    }
+
+    public function checkFailProvider()
+    {
+        return [
+            [function () { return new TextField('test', new StringType(str_repeat('a', TextField::MAX_FIELD_LENGTH + 1)), false); }, '\Data\Field\Exceptions\MaxLengthException'],
+        ];
     }
 }
