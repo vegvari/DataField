@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use Data\Field\Exceptions\MinValueException;
 use Data\Field\Exceptions\MaxValueException;
 
-class DecimalField extends NumberField
+class DecimalField extends NumericField
 {
     /**
      * @var int 1-65

@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use Data\Field\Exceptions\MinValueException;
 use Data\Field\Exceptions\MaxValueException;
 
-class IntField extends NumberField
+class IntField extends NumericField
 {
     /**
      * @var int

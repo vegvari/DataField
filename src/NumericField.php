@@ -7,7 +7,7 @@ use Data\Type\Number;
 use InvalidArgumentException;
 use Data\Field\Exceptions\MinValueException;
 
-abstract class NumberField extends Field
+abstract class NumericField extends Field
 {
     /**
      * @var bool

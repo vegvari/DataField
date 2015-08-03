@@ -4,7 +4,7 @@ namespace Data\Field;
 
 use Data\Type\FloatType;
 
-class FloatField extends NumberField
+class FloatField extends NumericField
 {
     /**
      * @param string    $name
