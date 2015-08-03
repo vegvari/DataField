@@ -4,15 +4,15 @@ namespace Data\Field;
 
 class BigIntField extends IntField
 {
-	/**
+    /**
      * @var int
      */
-    const MIN_FIELD_VALUE_SIGNED = -9223372036854775808;
+    const MIN_FIELD_VALUE_SIGNED = ~PHP_INT_MAX;
 
     /**
      * @var int
      */
-    const MAX_FIELD_VALUE_SIGNED = 9223372036854775807;
+    const MAX_FIELD_VALUE_SIGNED = PHP_INT_MAX;
 
     /**
      * @var int
@@ -22,7 +22,7 @@ class BigIntField extends IntField
     /**
      * @var int
      */
-    const MAX_FIELD_VALUE_UNSIGNED = 9223372036854775807;
+    const MAX_FIELD_VALUE_UNSIGNED = PHP_INT_MAX;
 
     /**
      * @var int
@@ -32,5 +32,5 @@ class BigIntField extends IntField
     /**
      * @var int
      */
-    const MAX_FIELD_VALUE_SERIAL = 9223372036854775807;
+    const MAX_FIELD_VALUE_SERIAL = PHP_INT_MAX;
 }

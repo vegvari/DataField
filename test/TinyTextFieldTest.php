@@ -12,7 +12,7 @@ class TinyTextFieldTest extends PHPUnit_Framework_TestCase
      */
     public function construct()
     {
-    	$instance = TinyTextField::nullable('test', 'UTF-8');
+        $instance = TinyTextField::nullable('test', 'UTF-8');
         $this->assertSame(TinyTextField::MAX_FIELD_LENGTH, $instance->getMaxLength());
 
         $instance = TinyTextField::nullable('test', 'UTF-8');

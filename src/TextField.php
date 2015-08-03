@@ -30,7 +30,7 @@ class TextField extends StringField
      */
     public static function notNull($name, $encoding, $default = null)
     {
-    	return new static($name, new StringType($default, $encoding), false);
+        return new static($name, new StringType($default, $encoding), false);
     }
 
     /**
@@ -42,6 +42,6 @@ class TextField extends StringField
      */
     public static function nullable($name, $encoding, $default = null)
     {
-    	return new static($name, new StringType($default, $encoding), true);
+        return new static($name, new StringType($default, $encoding), true);
     }
 }

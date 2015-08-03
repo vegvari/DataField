@@ -12,7 +12,7 @@ class MediumTextFieldTest extends PHPUnit_Framework_TestCase
      */
     public function construct()
     {
-    	$instance = MediumTextField::notNull('test', 'UTF-8');
+        $$instance = MediumTextField::notNull('test', 'UTF-8');
         $this->assertSame(MediumTextField::MAX_FIELD_LENGTH, $instance->getMaxLength());
 
         $instance = MediumTextField::nullable('test', 'UTF-8');

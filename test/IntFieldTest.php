@@ -151,6 +151,7 @@ class IntFieldTest extends PHPUnit_Framework_TestCase
     public function constructFailProvider()
     {
         return [
+            [function () { return new IntField('test', new IntType(), 1, false, false); }, 'InvalidArgumentException', 'Nullable must be bool'],
             [function () { return new IntField('test', new IntType(), false, 1, false); }, 'InvalidArgumentException', 'Unsigned must be bool'],
             [function () { return new IntField('test', new IntType(), false, false, 1); }, 'InvalidArgumentException', 'Serial must be bool'],
             [function () { return new IntField('test', new IntType(), false, false, true); }, 'InvalidArgumentException', 'Serial field must be unsigned'],
