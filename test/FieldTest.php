@@ -2,6 +2,7 @@
 
 use Data\Field\Field;
 use Data\Field\IntField;
+use Data\Field\BoolField;
 use Data\Field\CharField;
 use Data\Field\TextField;
 use Data\Field\FloatField;
@@ -9,6 +10,7 @@ use Data\Field\BigIntField;
 use Data\Field\DecimalField;
 use Data\Field\TinyIntField;
 use Data\Field\VarCharField;
+use Data\Field\DateTimeField;
 use Data\Field\LongTextField;
 use Data\Field\SmallIntField;
 use Data\Field\TinyTextField;
@@ -85,28 +87,34 @@ class FieldTest extends PHPUnit_Framework_TestCase
 
             [function () { return VarCharField::notNull(null, VarCharField::MAX_FIELD_LENGTH, 'UTF-8'); }],
             [function () { return VarCharField::notNull('', VarCharField::MAX_FIELD_LENGTH, 'UTF-8'); }],
+
+            [function () { return DateTimeField::notNull(null, 'UTC'); }],
+            [function () { return DateTimeField::notNull('', 'UTC'); }],
+
+            [function () { return BoolField::notNull(null); }],
+            [function () { return BoolField::notNull(''); }],
         ];
     }
 
     /**
      * @dataProvider defaultProvider
      */
-    public function testDefault(Closure $closure)
+    public function testDefault(Closure $closure, $expected, $something_else)
     {
         $instance = $closure();
-        $this->assertSame('12', (string) $instance->getData());
+        $this->assertSame($expected, $instance->getData()->value());
 
-        $instance->getData()->set(1);
-        $this->assertSame('1', (string) $instance->getData());
+        $instance->getData()->set($something_else);
+        $this->assertSame($something_else, $instance->getData()->value());
 
         $instance->getData()->set(null);
-        $this->assertSame('12', (string) $instance->getData());
+        $this->assertSame($expected, $instance->getData()->value());
 
-        $instance->getData()->set(1);
-        $this->assertSame('1', (string) $instance->getData());
+        $instance->getData()->set($something_else);
+        $this->assertSame($something_else, $instance->getData()->value());
 
         $instance->getData()->set('');
-        $this->assertSame('12', (string) $instance->getData());
+        $this->assertSame($expected, $instance->getData()->value());
     }
 
     /**
@@ -115,38 +123,42 @@ class FieldTest extends PHPUnit_Framework_TestCase
     public function defaultProvider()
     {
         return [
-            [function () { return TinyIntField::signedNotNull('test', '12'); }],
-            [function () { return TinyIntField::unsignedNotNull('test', '12'); }],
+            [function () { return TinyIntField::signedNotNull('test', '12'); }, 12, 11],
+            [function () { return TinyIntField::unsignedNotNull('test', '12'); }, 12, 11],
 
-            [function () { return SmallIntField::signedNotNull('test', '12'); }],
-            [function () { return SmallIntField::unsignedNotNull('test', '12'); }],
+            [function () { return SmallIntField::signedNotNull('test', '12'); }, 12, 11],
+            [function () { return SmallIntField::unsignedNotNull('test', '12'); }, 12, 11],
 
-            [function () { return MediumIntField::signedNotNull('test', '12'); }],
-            [function () { return MediumIntField::unsignedNotNull('test', '12'); }],
+            [function () { return MediumIntField::signedNotNull('test', '12'); }, 12, 11],
+            [function () { return MediumIntField::unsignedNotNull('test', '12'); }, 12, 11],
 
-            [function () { return IntField::signedNotNull('test', '12'); }],
-            [function () { return IntField::unsignedNotNull('test', '12'); }],
+            [function () { return IntField::signedNotNull('test', '12'); }, 12, 11],
+            [function () { return IntField::unsignedNotNull('test', '12'); }, 12, 11],
 
-            [function () { return BigIntField::signedNotNull('test', '12'); }],
-            [function () { return BigIntField::unsignedNotNull('test', '12'); }],
+            [function () { return BigIntField::signedNotNull('test', '12'); }, 12, 11],
+            [function () { return BigIntField::unsignedNotNull('test', '12'); }, 12, 11],
 
-            [function () { return FloatField::signedNotNull('test', '12'); }],
-            [function () { return FloatField::unsignedNotNull('test', '12'); }],
-            [function () { return FloatField::signedNotNull('test', '12'); }],
-            [function () { return FloatField::unsignedNotNull('test', '12'); }],
+            [function () { return FloatField::signedNotNull('test', '12'); }, 12.0, 11.0],
+            [function () { return FloatField::unsignedNotNull('test', '12'); }, 12.0, 11.0],
+            [function () { return FloatField::signedNotNull('test', '12'); }, 12.0, 11.0],
+            [function () { return FloatField::unsignedNotNull('test', '12'); }, 12.0, 11.0],
 
-            [function () { return DecimalField::signedNotNull('test', 10, 2, '12'); }],
-            [function () { return DecimalField::unsignedNotNull('test', 10, 2, '12'); }],
+            [function () { return DecimalField::signedNotNull('test', 10, 2, '12'); }, 12.0, 11.0],
+            [function () { return DecimalField::unsignedNotNull('test', 10, 2, '12'); }, 12.0, 11.0],
 
-            [function () { return TinyTextField::notNull('test', 'UTF-8', '12'); }],
+            [function () { return TinyTextField::notNull('test', 'UTF-8', '12'); }, '12', '11'],
 
-            [function () { return TextField::notNull('test', 'UTF-8', '12'); }],
+            [function () { return TextField::notNull('test', 'UTF-8', '12'); }, '12', '11'],
 
-            [function () { return LongTextField::notNull('test', 'UTF-8', '12'); }],
+            [function () { return LongTextField::notNull('test', 'UTF-8', '12'); }, '12', '11'],
 
-            [function () { return CharField::notNull('test', CharField::MAX_FIELD_LENGTH, 'UTF-8', '12'); }],
+            [function () { return CharField::notNull('test', CharField::MAX_FIELD_LENGTH, 'UTF-8', '12'); }, '12', '11'],
 
-            [function () { return VarCharField::notNull('test', VarCharField::MAX_FIELD_LENGTH, 'UTF-8', '12'); }],
+            [function () { return VarCharField::notNull('test', VarCharField::MAX_FIELD_LENGTH, 'UTF-8', '12'); }, '12', '11'],
+
+            [function () { return DateTimeField::notNull('test', 'UTC', '2013-06-09'); }, '2013-06-09 00:00:00', '2013-06-29 00:00:00'],
+
+            [function () { return BoolField::notNull('test', true); }, true, false],
         ];
     }
 }
