@@ -11,20 +11,6 @@ class IntFieldTest extends PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function construct()
-    {
-
-        $instance = new IntField('test', new IntType(), false, true, true);
-        $this->assertSame(false, $instance->isNullable());
-        $this->assertSame(true, $instance->isUnsigned());
-        $this->assertSame(true, $instance->isSerial());
-        $this->assertSame(IntField::MIN_FIELD_VALUE_SERIAL, $instance->getMinValue());
-        $this->assertSame(IntField::MAX_FIELD_VALUE_SERIAL, $instance->getMaxValue());
-    }
-
-    /**
-     * @test
-     */
     public function signedNotNull()
     {
         $instance = new IntField('test', new IntType(), false, false, false);
