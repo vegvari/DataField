@@ -8,18 +8,12 @@ use Data\Field\Exceptions\MaxLengthException;
 abstract class StringField extends Field
 {
     /**
-     * @var int
-     */
-    protected $max_length;
-
-    /**
-     * @param string $name
-     * @param mixed  $default
-     * @param bool   $nullable
+     * @param string     $name
+     * @param StringType $default
+     * @param bool       $nullable
      */
     public function __construct($name, StringType $data, $nullable)
     {
-        $this->max_length = static::MAX_FIELD_LENGTH;
         parent::__construct($name, $data, $nullable);
     }
 
@@ -34,12 +28,9 @@ abstract class StringField extends Field
     }
 
     /**
-     * Return the max_length property
+     * Return the maximum length
      *
      * @return int
      */
-    public function getMaxLength()
-    {
-        return $this->max_length;
-    }
+    abstract public function getMaxLength();
 }

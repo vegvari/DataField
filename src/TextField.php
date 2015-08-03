@@ -12,6 +12,16 @@ class TextField extends StringField
     const MAX_FIELD_LENGTH = 65535;
 
     /**
+     * Return the maximum length
+     *
+     * @return int
+     */
+    public function getMaxLength()
+    {
+        return static::MAX_FIELD_LENGTH;
+    }
+
+    /**
      * Create not null
      *
      * @param string $name
