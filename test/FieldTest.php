@@ -161,4 +161,115 @@ class FieldTest extends PHPUnit_Framework_TestCase
             [function () { return BoolField::notNull('test', true); }, true, false],
         ];
     }
+
+    /**
+     * @dataProvider instanceProvider
+     * @covers       ::__toString
+     */
+    public function testToString($instance, array $data)
+    {
+        $this->assertSame('', (string) $instance);
+
+        $instance->set((string) $data[0]);
+        $this->assertSame((string) $data[0], (string) $instance->value());
+
+        $instance->set((string) $data[1]);
+        $this->assertSame((string) $data[1], (string) $instance->value());
+    }
+
+    /**
+     * @dataProvider instanceProvider
+     * @covers       ::set
+     * @covers       ::value
+     */
+    public function testValue($instance, array $data)
+    {
+        $this->assertSame(null, $instance->value());
+
+        $instance->set($data[0]);
+        $this->assertSame($data[0], $instance->value());
+
+        $instance->set($data[1]);
+        $this->assertSame($data[1], $instance->value());
+    }
+
+    /**
+     * @test
+     * @dataProvider instanceProvider
+     * @covers       ::attach
+     * @covers       ::detach
+     * @covers       ::notify
+     * @covers       ::__clone
+     */
+    public function observer($instance, array $data)
+    {
+        $observer = $this->getMockBuilder('SplObserver')
+                         ->setMethods(['update'])
+                         ->getMock();
+
+        $observer->expects($this->exactly(2))
+                 ->method('update')
+                 ->with($this->equalTo($instance));
+
+        // no update on attach
+        $instance->attach($observer);
+
+        // first update
+        $instance->set($data[0]);
+
+        // no update because value is not changed
+        $instance->set($data[0]);
+
+        // second update
+        $instance->set($data[1]);
+
+        // detach and change again without the observers
+        $instance->detach($observer);
+        $instance->set($data[0]);
+
+        // detach observers
+        $clone = clone $instance;
+        $clone->set($data[0]);
+        $clone->set($data[1]);
+    }
+
+    public function instanceProvider()
+    {
+        return [
+            [TinyIntField::signedNotNull('test'), [1, 2]],
+            [TinyIntField::unsignedNotNull('test'), [1, 2]],
+
+            [SmallIntField::signedNotNull('test'), [1, 2]],
+            [SmallIntField::unsignedNotNull('test'), [1, 2]],
+
+            [MediumIntField::signedNotNull('test'), [1, 2]],
+            [MediumIntField::unsignedNotNull('test'), [1, 2]],
+
+            [IntField::signedNotNull('test'), [1, 2]],
+            [IntField::unsignedNotNull('test'), [1, 2]],
+
+            [BigIntField::signedNotNull('test'), [1, 2]],
+            [BigIntField::unsignedNotNull('test'), [1, 2]],
+
+            [FloatField::signedNotNull('test'), [1.0, 2.0]],
+            [FloatField::unsignedNotNull('test'), [1.0, 2.0]],
+
+            [DecimalField::signedNotNull('test', 10, 2), [1.0, 2.0]],
+            [DecimalField::unsignedNotNull('test', 10, 2), [1.0, 2.0]],
+
+            [TinyTextField::notNull('test', 'UTF-8'), ['a', 'b']],
+
+            [TextField::notNull('test', 'UTF-8'), ['a', 'b']],
+
+            [LongTextField::notNull('test', 'UTF-8'), ['a', 'b']],
+
+            [CharField::notNull('test', 1, 'UTF-8'), ['a', 'b']],
+
+            [VarCharField::notNull('test', 1, 'UTF-8'), ['a', 'b']],
+
+            [DateTimeField::notNull('test', 'UTC'), ['2013-06-09 00:00:00', '2013-06-19 00:00:00']],
+
+            [BoolField::notNull('test'), [true, false]],
+        ];
+    }
 }

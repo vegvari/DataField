@@ -68,6 +68,26 @@ abstract class Field implements SplObserver, SplSubject
     abstract protected function check();
 
     /**
+     * Setter for the data instance
+     *
+     * @param mixed $value
+     */
+    public function set($value)
+    {
+        $this->getData()->set($value);
+    }
+
+    /**
+     * Data instance getter
+     *
+     * @return mixed
+     */
+    public function value()
+    {
+        return $this->getData()->value();
+    }
+
+    /**
      * Return the name property
      */
     public function getName()
@@ -151,9 +171,22 @@ abstract class Field implements SplObserver, SplSubject
         }
     }
 
+    /**
+     * Clone the data instance and attach the cloned Field
+     */
     public function __clone()
     {
         $this->data = clone $this->getData();
         $this->getData()->attach($this);
+    }
+
+    /**
+     * Return the data instance when converted to string
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string) $this->getData();
     }
 }
