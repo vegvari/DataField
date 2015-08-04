@@ -5,10 +5,11 @@ namespace Data\Field;
 use SplSubject;
 use SplObserver;
 use Data\Type\Type;
+use SplObjectStorage;
 
 use InvalidArgumentException;
 
-abstract class Field implements SplObserver
+abstract class Field implements SplObserver, SplSubject
 {
     /**
      * @var string
@@ -29,6 +30,11 @@ abstract class Field implements SplObserver
      * @var bool
      */
     protected $nullable;
+
+    /**
+     * @var SplObjectStorage
+     */
+    protected $observers;
 
     /**
      * @param string $name
@@ -97,6 +103,8 @@ abstract class Field implements SplObserver
         } elseif (! $this->isNullable()) {
             $subject->set($this->getDefault());
         }
+
+        $this->notify();
     }
 
     /**
@@ -107,5 +115,45 @@ abstract class Field implements SplObserver
     public function isNullable()
     {
         return $this->nullable === true;
+    }
+
+    /**
+     * @see SplObserver
+     */
+    final public function attach(SplObserver $observer)
+    {
+        if ($this->observers === null) {
+            $this->observers = new SplObjectStorage();
+        }
+
+        $this->observers->attach($observer);
+    }
+
+    /**
+     * @see SplObserver
+     */
+    final public function detach(SplObserver $observer)
+    {
+        if ($this->observers !== null) {
+            $this->observers->detach($observer);
+        }
+    }
+
+    /**
+     * @see SplObserver
+     */
+    final public function notify()
+    {
+        if ($this->observers !== null) {
+            foreach ($this->observers as $observer) {
+                $observer->update($this);
+            }
+        }
+    }
+
+    public function __clone()
+    {
+        $this->data = clone $this->getData();
+        $this->getData()->attach($this);
     }
 }
